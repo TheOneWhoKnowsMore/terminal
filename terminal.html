@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gothic Terminal Portfolio</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: "Courier New", Courier, monospace;
+      margin: 0;
+      padding: 0;
+    }
+
+    #terminal {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .command-line {
+      border: 1px solid #fff;
+      padding: 10px;
+      border-radius: 5px;
+      width: 500px;
+      position: relative;
+    }
+
+    .command-line:before {
+      content: ">>";
+      color: #ff5454;
+      padding-right: 5px;
+    }
+
+    .output {
+      color: #00ff00;
+      margin-bottom: 10px;
+    }
+
+    .prompt {
+      color: #fff;
+    }
+
+    .blink {
+      animation: blink 1s infinite;
+    }
+
+    .fade-in {
+      animation: fade-in 2s ease-in;
+    }
+
+    .slide-in-bottom {
+      animation: slide-in-bottom 1s ease-out;
+    }
+
+    .error {
+      color: #ff5454;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes fade-in {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slide-in-bottom {
+      0% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Add this CSS rule */
+    input[type="text"] {
+      background-color: #000;
+      color: #fff;
+      border: none;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal">
+    <div class="command-line fade-in">
+      <div class="output slide-in-bottom">Welcome to my Gothic Terminal Portfolio!</div>
+      <div class="output slide-in-bottom">Please enter a command:</div>
+      <div>
+        <span class="prompt blink">>> </span>
+        <input id="command-input" type="text" autofocus />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const commandInput = document.getElementById("command-input");
+    commandInput.addEventListener("keydown", handleCommand);
+
+    function handleCommand(event) {
+      if (event.key === "Enter") {
+        const command = commandInput.value;
+        processCommand(command);
+        commandInput.value = "";
+      }
+    }
+
+    function processCommand(command) {
+      const outputElement = document.createElement("div");
+      outputElement.classList.add("output", "slide-in-bottom");
+      let outputText;
+      let isError = false;
+
+      switch (command) {
+        case "help":
+          outputText = "Available commands: about, projects, contact, clear";
+          break;
+        case "about":
+          outputText = "I am a gothic-inspired web developer. I love creating dark and immersive experiences with code.";
+          break;
+        case "projects":
+          outputText = "Here are some of my projects:\n- Project 1\n- Project 2\n- Project 3";
+          break;
+        case "contact":
+          outputText = "You can reach me at example@example.com";
+          break;
+        case "clear":
+          clearTerminal();
+          return;
+        default:
+          outputText = "Command not recognized. Type 'help' for a list of available commands";
+          isError = true;
+          break;
+      }
+
+      outputElement.textContent = outputText;
+      if (isError) {
+        outputElement.classList.add("error");
+      }
+      const commandLine = document.querySelector(".command-line");
+      commandLine.insertBefore(outputElement, commandInput.parentNode);
+      commandLine.scrollTop = commandLine.scrollHeight;
+    }
+
+    function clearTerminal() {
+      const commandLine = document.querySelector(".command-line");
+      const outputs = commandLine.querySelectorAll(".output");
+      outputs.forEach(output => output.remove());
+    }
+  </script>
+</body>
+</html>
