@@ -1,163 +1,181 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Gothic Terminal Portfolio</title>
+  <title>Image.Pr0ject*r</title>
   <style>
     body {
-      background-color: #000;
-      color: #fff;
-      font-family: "Courier New", Courier, monospace;
-      margin: 0;
-      padding: 0;
+      background-color: white;
+      color: black;
     }
 
-    #terminal {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+    img {
+      max-width: 700px;
+      max-height: 700px;
+      margin-top: 20px;
+      position: absolute;
     }
 
-    .command-line {
-      border: 1px solid #fff;
-      padding: 10px;
-      border-radius: 5px;
-      width: 500px;
-      position: relative;
-    }
-
-    .command-line:before {
-      content: ">>";
-      color: #ff5454;
-      padding-right: 5px;
-    }
-
-    .output {
-      color: #00ff00;
-      margin-bottom: 10px;
-    }
-
-    .prompt {
-      color: #fff;
-    }
-
-    .blink {
-      animation: blink 1s infinite;
-    }
-
-    .fade-in {
-      animation: fade-in 2s ease-in;
-    }
-
-    .slide-in-bottom {
-      animation: slide-in-bottom 1s ease-out;
-    }
-
-    .error {
-      color: #ff5454;
-    }
-
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
-
-    @keyframes fade-in {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
-    }
-
-    @keyframes slide-in-bottom {
-      0% {
-        transform: translateY(100%);
-        opacity: 0;
-      }
-      100% {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    /* Add this CSS rule */
-    input[type="text"] {
-      background-color: #000;
-      color: #fff;
-      border: none;
-      outline: none;
+    .dragging {
+      border: 2px dashed red;
     }
   </style>
 </head>
 <body>
-  <div id="terminal">
-    <div class="command-line fade-in">
-      <div class="output slide-in-bottom">Welcome to OFFdeath+ SH#T IS COMMING S00N!</div>
-      <div class="output slide-in-bottom">Please enter a command :</div>
-      <div>
-        <span class="prompt blink">>> </span>
-        <input id="command-input" type="text" autofocus />
-      </div>
-    </div>
+  <h1>
+    Image Projector Project
+    <button id="switchBackgroundButton">Switch Background</button>
+  </h1>
+  
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="imageInput" accept="image/*" multiple />
+    <input type="submit" value="Upload" />
+  </form>
+
+  <div id="imageContainer"></div>
+
+  <div>
+    <label for="widthSlider">Width: </label>
+    <input type="range" id="widthSlider" min="10" max="700" value="7000">
+  </div>
+
+  <div>
+    <label for="heightSlider">Height:</label>
+    <input type="range" id="heightSlider" min="10" max="700" value="700">
+  </div>
+
+  <div>
+    <label for="scaleSlider">Scale:</label>
+    <input type="range" id="scaleSlider" min="0.1" max="2" step="0.1" value="1">
+  </div>
+
+
+  <div>
+    <label for="thresholdSlider">Brightness:</label>
+    <input type="range" id="thresholdSlider" min="0" max="255" value="255">
+  </div>
+
+  <div>
+    <label for="rotationSlider">Rotation:</label>
+    <input type="range" id="rotationSlider" min="-180" max="180" value="0">
+    <button id="resetRotationButton">Reset</button>
+  </div>
+
+  <div>
+    <label for="invertToggle">Invert Color:</label>
+    <input type="checkbox" id="invertToggle">
   </div>
 
   <script>
-    const commandInput = document.getElementById("command-input");
-    commandInput.addEventListener("keydown", handleCommand);
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var fileInput = document.getElementById('imageInput');
+      var files = fileInput.files;
+      
+      var imageContainer = document.getElementById('imageContainer');
+      imageContainer.innerHTML = '';
 
-    function handleCommand(event) {
-      if (event.key === "Enter") {
-        const command = commandInput.value;
-        processCommand(command);
-        commandInput.value = "";
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var imgElement = document.createElement('img');
+          imgElement.src = e.target.result;
+          imgElement.style.left = '0px';
+          imgElement.style.top = '0px';
+          imageContainer.appendChild(imgElement);
+
+          // Enable image dragging
+          var isDragging = false;
+          var initialX = 0;
+          var initialY = 0;
+
+          imgElement.addEventListener('mousedown', function(event) {
+            event.preventDefault();
+            isDragging = true;
+            initialX = event.clientX - parseInt(imgElement.style.left);
+            initialY = event.clientY - parseInt(imgElement.style.top);
+            imgElement.classList.add('dragging');
+          });
+
+          document.addEventListener('mouseup', function() {
+            if (isDragging) {
+              isDragging = false;
+              imgElement.classList.remove('dragging');
+            }
+          });
+
+          document.addEventListener('mousemove', function(event) {
+            if (isDragging) {
+              imgElement.style.left = event.clientX - initialX + 'px';
+              imgElement.style.top = event.clientY - initialY + 'px';
+            }
+          });
+
+          // Add event listeners for sliders and toggle
+          var widthSlider = document.getElementById('widthSlider');
+          var heightSlider = document.getElementById('heightSlider');
+          var scaleSlider = document.getElementById('scaleSlider');
+          var invertToggle = document.getElementById('invertToggle');
+          var thresholdSlider = document.getElementById('thresholdSlider');
+          var rotationSlider = document.getElementById('rotationSlider');
+          var resetRotationButton = document.getElementById('resetRotationButton');
+          var switchBackgroundButton = document.getElementById('switchBackgroundButton');
+
+          widthSlider.addEventListener('input', function() {
+            var widthValue = widthSlider.value;
+            imgElement.style.width = widthValue + 'px';
+          });
+
+          heightSlider.addEventListener('input', function() {
+            var heightValue = heightSlider.value;
+            imgElement.style.height = heightValue + 'px';
+          });
+
+          scaleSlider.addEventListener('input', function() {
+            var scaleValue = scaleSlider.value;
+            imgElement.style.transform = 'scale(' + scaleValue + ') rotate(' + rotationSlider.value + 'deg)';
+          });
+
+          invertToggle.addEventListener('change', function() {
+            if (invertToggle.checked) {
+              imgElement.style.filter = 'invert(100%)';
+            } else {
+              imgElement.style.filter = 'none';
+            }
+          });
+
+          thresholdSlider.addEventListener('input', function() {
+            var thresholdValue = thresholdSlider.value;
+            var filterValue = 'brightness(' + thresholdValue / 255 + ')';
+            imgElement.style.filter = filterValue;
+          });
+
+          rotationSlider.addEventListener('input', function() {
+            var rotationValue = rotationSlider.value;
+            imgElement.style.transform = 'scale(' + scaleSlider.value + ') rotate(' + rotationValue + 'deg)';
+          });
+
+          resetRotationButton.addEventListener('click', function() {
+            rotationSlider.value = 0;
+            imgElement.style.transform = 'scale(' + scaleSlider.value + ') rotate(0deg)';
+          });
+
+          switchBackgroundButton.addEventListener('click', function() {
+            var body = document.body;
+            if (body.style.backgroundColor === 'white') {
+              body.style.backgroundColor = 'black';
+              body.style.color = 'white';
+            } else {
+              body.style.backgroundColor = 'white';
+              body.style.color = 'black';
+            }
+          });
+        };
+
+        reader.readAsDataURL(file);
       }
-    }
-
-    function processCommand(command) {
-      const outputElement = document.createElement("div");
-      outputElement.classList.add("output", "slide-in-bottom");
-      let outputText;
-      let isError = false;
-
-      switch (command) {
-        case "help":
-          outputText = "Available commands: about, projects, contact, clear";
-          break;
-        case "about":
-          outputText = "Welcome to the fashion sanctuary, an oasis where the chosen few within this new generation find solace in exceptional style. Our clothing brand embraces the ethos of exclusivity, curating a collection that embodies the essence of discerning taste and unparalleled craftsmanship. With every thread woven, every detail meticulously designed, we strive to create an immersive experience that celebrates your journey as one of the privileged individuals shaping the future of fashion.";
-          break;
-        case "projects":
-          outputText = "Here are some of my projects:\n- Xclusive\n- zRxd\n- OFFdeath+";
-          break;
-        case "contact":
-          outputText = "You can reach me at zrxd.cc@gmail.com";
-          break;
-        case "clear":
-          clearTerminal();
-          return;
-        default:
-          outputText = "Command not recognized. Type 'help' for a list of available commands";
-          isError = true;
-          break;
-      }
-
-      outputElement.textContent = outputText;
-      if (isError) {
-        outputElement.classList.add("error");
-      }
-      const commandLine = document.querySelector(".command-line");
-      commandLine.insertBefore(outputElement, commandInput.parentNode);
-      commandLine.scrollTop = commandLine.scrollHeight;
-    }
-
-    function clearTerminal() {
-      const commandLine = document.querySelector(".command-line");
-      const outputs = commandLine.querySelectorAll(".output");
-      outputs.forEach(output => output.remove());
-    }
+    });
   </script>
 </body>
 </html>
